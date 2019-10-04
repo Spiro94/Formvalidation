@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:formvalidation/src/bloc/login_bloc.dart';
+import 'package:formvalidation/src/bloc/provider.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key key}) : super(key: key);
@@ -82,7 +84,10 @@ class LoginPage extends StatelessWidget {
   }
 
   Widget _crearLogin(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final bloc = Provider.of(
+        context); //Obtiene la instancia del loginbloc creada en el provider mediante el inherited widget
+    final size =
+        MediaQuery.of(context).size; //Obtiene el tamaño de la pantalla.
 
     return SingleChildScrollView(
       child: Column(
@@ -112,15 +117,15 @@ class LoginPage extends StatelessWidget {
                   'Ingreso',
                   style: TextStyle(fontSize: 20.0),
                 ),
-                _crearEmail(),
+                _crearEmail(bloc),
                 SizedBox(
                   height: 15.0,
                 ),
-                _crearPassword(),
+                _crearPassword(bloc),
                 SizedBox(
                   height: 15.0,
                 ),
-                _crearBoton(),
+                _crearBoton(bloc),
               ],
             ),
           ),
@@ -133,51 +138,78 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _crearEmail() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      child: TextField(
-        keyboardType: TextInputType.emailAddress,
-        decoration: InputDecoration(
-            icon: Icon(
-              Icons.alternate_email,
-              color: Colors.deepPurple,
+  Widget _crearEmail(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.emailStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: TextField(
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+              icon: Icon(
+                Icons.alternate_email,
+                color: Colors.deepPurple,
+              ),
+              labelText: 'Correo electrónico',
+              hintText: 'ejemplo@correo.com',
+              counterText: snapshot.data,
+              errorText: snapshot.error,
             ),
-            labelText: 'Correo electrónico',
-            hintText: 'ejemplo@correo.com'),
-      ),
-    );
-  }
-
-  Widget _crearPassword() {
-    return Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.0),
-        child: TextField(
-          obscureText: true,
-          decoration: InputDecoration(
-            icon: Icon(
-              Icons.lock_outline,
-              color: Colors.deepPurple,
-            ),
-            labelText: 'Contraseña',
-            // hintText: 'ejemplo@correo.com'),
+            onChanged: bloc.changeEmail,
           ),
-        ));
+        );
+      },
+    );
   }
 
-  Widget _crearBoton() {
-    return RaisedButton(
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 10.0),
-        child: Text('Ingresar'),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5.0),
-      ),
-      elevation: 0.0,
-      color: Colors.deepPurple,
-      textColor: Colors.white,
-      onPressed: () {},
+  Widget _crearPassword(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.passwordStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: TextField(
+            obscureText: true,
+            decoration: InputDecoration(
+              icon: Icon(
+                Icons.lock_outline,
+                color: Colors.deepPurple,
+              ),
+              labelText: 'Contraseña',
+              counterText: snapshot.data,
+              errorText: snapshot.error,
+              // hintText: 'ejemplo@correo.com'),
+            ),
+            onChanged: bloc.changePassword,
+          ),
+        );
+      },
     );
+  }
+
+  Widget _crearBoton(LoginBloc bloc) {
+    return StreamBuilder(
+      stream: bloc.formValidStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        return RaisedButton(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 10.0),
+            child: Text('Ingresar'),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          elevation: 0.0,
+          color: Colors.deepPurple,
+          textColor: Colors.white,
+          onPressed: snapshot.hasData ? () => _login(bloc, context) : null,
+        );
+      },
+    );
+  }
+
+  _login(LoginBloc bloc, BuildContext context) {
+    Navigator.pushReplacementNamed(context, 'home');
   }
 }
