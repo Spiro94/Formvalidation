@@ -54,12 +54,12 @@ class HomePage extends StatelessWidget {
         color: Colors.purple,
       ),
       onDismissed: (direccion) {
-        //TODO: Borrar registro
+        productoProvider.eliminarProducto(producto.id);
       },
       child: ListTile(
         title: Text('${producto.titulo} - ${producto.valor}'),
         subtitle: Text(producto.id),
-        onTap: () => Navigator.pushNamed(context, 'producto'),
+        onTap: () => Navigator.pushNamed(context, 'producto', arguments: producto),
       ),
     );
   }
